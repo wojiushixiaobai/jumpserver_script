@@ -35,14 +35,14 @@ def update_assetsip():
         hostname = json.loads(response.text)[0]['hostname']
     except IndexError:
         print("\033[32m 资产ip输入错误 \033[0m")
-		exit()
+        exit()
 
     data = { 'ip': '%s' % new_ip, 'hostname': '%s' % hostname }
     try:
         url_1 = jms_url + '%s/' %id
     except UnboundLocalError:
         print("\033[32m 资产ip输入错误 \033[0m")
-		exit()
+        exit()
 
     r = requests.put(url_1, headers=headers, data=json.dumps(data))
     print ("\033[31m ip已经修改成{} \033[0m".format(json.loads(r.text)['ip']))
@@ -52,4 +52,4 @@ try:
     update_assetsip()
 except UnboundLocalError:
     print("\033[32m 资产ip输入错误 \033[0m")
-	exit()
+    exit()
