@@ -7,9 +7,12 @@
 import sys, requests, json
 
 jms_url        = 'http://192.168.1.118/'
+
+# 资产管理用户
 admin_name     = 'Linux_root'
 admin_username = 'root'
 admin_password = 'root'
+
 ip = sys.argv[1]
 
 def get_token():
