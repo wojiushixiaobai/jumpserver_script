@@ -13,7 +13,7 @@ admin_user = '2efab732-e267-46bc-a8ba-d5c5cb0c5195'
 ip = sys.argv[1]
 
 # def get_token():
-#     url = 'https://demo.jumpserver.org/api/users/v1/auth/'
+#     url = jms_url + 'api/users/v1/auth/'
 #     query_args = {
 #         "username": "admin",
 #         "password": "admin"
@@ -32,7 +32,7 @@ def create_assets():
 
     url = jms_url + 'api/assets/v1/assets/'
 
-    data = { 'ip': '%s' % ip, 'hostname': '%s' % ip, 'protocols': [ 'ssh/22' ], 'platform': 'Linux', 'is_active': 'true', 'admin_user': '%s' % admin_user }
+    data = '{ "ip": "%s", "hostname": "%s", "protocols": [ "ssh/22" ], "platform": "Linux", "is_active": "true", "admin_user": "%s"}'  %(ip, ip, admin_user)
     r = requests.post(url, headers=headers, data=json.dumps(data))
 
     try:

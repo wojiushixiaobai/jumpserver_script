@@ -6,14 +6,14 @@
 
 import sys, requests, json
 
-jms_url = 'http://192.168.100.104/api/assets/v1/assets/'
+jms_url = 'http://192.168.100.104/'
 jms_token = 'ad47cab1e364a96fc40899d282989b147c21dfa7'
 # jms_token = get_token()
 old_ip = sys.argv[1]
 new_ip = sys.argv[2]
 
 # def get_token():
-#     url = 'https://demo.jumpserver.org/api/users/v1/auth/'
+#     url = jms_url + 'api/users/v1/auth/'
 #     query_args = {
 #         "username": "admin",
 #         "password": "admin"
@@ -23,7 +23,7 @@ new_ip = sys.argv[2]
 
 def update_assetsip():
     global jms_url, jms_token, old_ip, new_ip
-    url = jms_url + '?ip=%s' % old_ip
+    url = jms_url + 'api/assets/v1/assets/?ip=%s' %old_ip
     headers = {
         'Authorization': 'Token ' + jms_token,
         'accept'       : 'application/json',
@@ -37,7 +37,7 @@ def update_assetsip():
         print("\033[32m 资产ip输入错误 \033[0m")
         exit()
 
-    data = { 'ip': '%s' % new_ip, 'hostname': '%s' % hostname }
+    data = data = '{ "ip": "%s", "hostname": "%s" }' %(old_ip, hostname)
     try:
         url_1 = jms_url + '%s/' %id
     except UnboundLocalError:
