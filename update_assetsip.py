@@ -6,30 +6,33 @@
 
 import sys, requests, json
 
-jms_url = 'http://192.168.100.104/'
-jms_token = 'ad47cab1e364a96fc40899d282989b147c21dfa7'
-# jms_token = get_token()
+jms_url = 'http://192.168.1.118/'
 old_ip = sys.argv[1]
 new_ip = sys.argv[2]
 
-# def get_token():
-#     url = jms_url + 'api/users/v1/auth/'
-#     query_args = {
-#         "username": "admin",
-#         "password": "admin"
-#     }
-#     response = requests.post(url, data=query_args)
-#     return json.loads(response.text)['token']
+def get_token():
+    url = jms_url + 'api/users/v1/auth/'
+    query_args = {
+        "username": "admin",
+        "password": "admin"
+    }
+    response = requests.post(url, data=query_args)
+    return json.loads(response.text)['token']
 
 def update_assetsip():
-    global jms_url, jms_token, old_ip, new_ip
+
     url = jms_url + 'api/assets/v1/assets/?ip=%s' %old_ip
+
+    jms_token = get_token()
+
     headers = {
-        'Authorization': 'Token ' + jms_token,
+        'Authorization': 'Bearer ' + jms_token,
         'accept'       : 'application/json',
         'Content-Type' : 'application/json',
     }
+
     response = requests.get(url, headers=headers)
+
     try:
         id   = json.loads(response.text)[0]['id']
         hostname = json.loads(response.text)[0]['hostname']
@@ -37,14 +40,14 @@ def update_assetsip():
         print("\033[32m 资产ip输入错误 \033[0m")
         exit()
 
-    data = data = '{ "ip": "%s", "hostname": "%s" }' %(old_ip, hostname)
+    data = '{ "ip": "%s", "hostname": "%s" }' %(old_ip, hostname)
     try:
-        url_1 = jms_url + '%s/' %id
+        url_1 = jms_url + 'api/assets/v1/assets/%s/' %id
     except UnboundLocalError:
         print("\033[32m 资产ip输入错误 \033[0m")
         exit()
 
-    r = requests.put(url_1, headers=headers, data=json.dumps(data))
+    r = requests.put(url_1, headers=headers, data=data)
     print ("\033[31m ip已经修改成{} \033[0m".format(json.loads(r.text)['ip']))
     return
 
