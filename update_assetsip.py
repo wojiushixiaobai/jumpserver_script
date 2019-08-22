@@ -40,7 +40,7 @@ def update_assetsip():
         print("\033[32m 资产ip输入错误 \033[0m")
         exit()
 
-    data = '{ "ip": "%s", "hostname": "%s" }' %(old_ip, hostname)
+    data = '{ "ip": "%s", "hostname": "%s" }' %(new_ip, hostname)
     try:
         url_1 = jms_url + 'api/assets/v1/assets/%s/' %id
     except UnboundLocalError:
