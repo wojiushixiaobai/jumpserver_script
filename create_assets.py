@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# Usage： python update_assetsip.py 1.1.1.1
+# Usage： python create_assetsip.py 1.1.1.1
 # 1.1.1.1 为要添加的新资产 ip
 
 import sys, requests, json
