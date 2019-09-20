@@ -3,22 +3,6 @@
 
 import os, requests, json, uuid, sys, datetime, time, random
 
-# jumpserver url 地址
-jms_url                = 'http://192.168.1.118'
-
-# 管理员账户
-users_username         = 'admin'
-users_password         = 'admin'
-
-# 资产管理用户
-assets_admin_name      = 'root_test'
-assets_admin_username  = 'root'
-assets_admin_password  = 'root'
-
-# 资产系统用户
-assets_system_name     = 'update_user'
-# assets_system_username = 'test_user'
-
 class HTTP:
     server = None
     token = None
@@ -26,12 +10,12 @@ class HTTP:
     @classmethod
     def get_token(cls, username, password):
         print("获取Token")
-        data      = {'username': username, 'password': password}
-        url       = "/api/authentication/v1/auth/"
-        res       = requests.post(cls.server + url, data)
-        res_data  = res.json()
-        token     = res_data.get('token')
-        cls.token = token
+        data              = {'username': username, 'password': password}
+        url               = "/api/authentication/v1/auth/"
+        res               = requests.post(cls.server + url, data)
+        res_data          = res.json()
+        token             = res_data.get('token')
+        cls.token         = token
 
     @classmethod
     def get(cls, url, params=None, **kwargs):
@@ -58,12 +42,10 @@ class User(object):
     def __init__(self):
         self.id           = None
         self.username     = None
-        self.email_suffix = 'jumpserver.org'
 
     def input_preconditions(self):
         print("请输入前置条件: ")
-        self.username     = input("Please enter user username: ")
-        self.useremail    = input("Please enter user email (user@jumpserver.org): ")
+        self.username     = input("请输入需要新建的用户 (user): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -77,16 +59,16 @@ class User(object):
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("用户不存在: {}".format(self.username))
+        print("用户不存在")
         return False
 
     def create(self):
-        print("创建用户")
+        print("创建用户 {}".format(self.username))
         url               = '/api/users/v1/users/'
         data              = {
             'name': self.username,
             'username': self.username,
-            'email': self.useremail,
+            'email': '{}@jumpserver.org'.format(self.username),
             'is_active': True
         }
         res               = HTTP.post(url, data)
@@ -105,7 +87,7 @@ class Node(object):
         self.name         = None
 
     def input_preconditions(self):
-        self.name         = input("Please enter node name: ")
+        self.name         = input("请输入资产节点名称: ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -119,11 +101,11 @@ class Node(object):
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print('节点不存在: {}'.format(self.id))
+        print("节点不存在")
         return False
 
     def create(self):
-        print("创建资产节点")
+        print("创建资产节点 {}".format(self.name))
         url               = '/api/assets/v1/nodes/'
         data              = {
             'value': self.name
@@ -147,11 +129,7 @@ class AdminUser(object):
 
     def input_preconditions(self):
         if self.name is None:
-            self.name = input("Please enter assets admin name: ")
-        if self.username is None:
-            self.username = input("Please enter assets admin username: ")
-        if self.password is None:
-            self.password     = input("Please enter assets admin password: ")
+            self.name     = input("请输入资产管理用户名称 (test_root): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -165,11 +143,15 @@ class AdminUser(object):
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("管理用户不存在: {}".format(self.id))
+        print("管理用户不存在")
+        if self.username is None:
+            self.username = input("请输入资产管理用户 (root): ")
+        if self.password is None:
+            self.password = input("请输入资产管理用户密码 (********): ")
         return False
 
     def create(self):
-        print("创建管理用户")
+        print("创建管理用户 {}".format(self.name))
         url               = '/api/users/v1/users/'
         data              = {
             'name': self.name,
@@ -188,13 +170,13 @@ class AdminUser(object):
 class Asset(object):
 
     def __init__(self):
-        self.id = None
-        self.ip = None
-        self.admin_user = AdminUser()
-        self.node = Node()
+        self.id           = None
+        self.ip           = None
+        self.admin_user   = AdminUser()
+        self.node         = Node()
 
     def input_preconditions(self):
-        self.ip = input("Please enter asset ip: ")
+        self.ip           = input("请输入资产IP: ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -203,32 +185,32 @@ class Asset(object):
 
     def exist(self):
         print("校验资产")
-        url = '/api/assets/v1/assets/'
-        params = {
+        url               = '/api/assets/v1/assets/'
+        params            = {
             'ip': self.ip
         }
-        res = HTTP.get(url, params)
-        res_data = res.json()
+        res               = HTTP.get(url, params)
+        res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
-            self.id = res_data[0].get('id')
+            self.id       = res_data[0].get('id')
             return True
-        print("资产不存在: {}".format(self.ip))
+        print("资产不存在")
         return False
 
     def create(self):
-        print("创建资产")
+        print("创建资产 {}".format(self.ip))
         self.admin_user.perform()
         self.node.perform()
-        url = '/api/assets/v1/assets/'
-        data = {
+        url               = '/api/assets/v1/assets/'
+        data              = {
             'hostname': self.ip,
             'ip': self.ip,
             'admin_user': self.admin_user.id,
             'nodes': [self.node.id],
             'is_active': True
         }
-        res = HTTP.post(url, data)
-        self.id = res.json().get('id')
+        res               = HTTP.post(url, data)
+        self.id           = res.json().get('id')
 
     def perform(self):
         self.get_preconditions()
@@ -238,76 +220,81 @@ class Asset(object):
 class SystemUser(object):
 
     def __init__(self):
-        self.id       = None
-        self.name     = assets_system_name
-        # self.username = assets_system_username
+        self.id           = None
+        self.name         = assets_system_name
+        self.username     = assets_system_username
 
     def input_preconditions(self):
         if self.name is None:
-            self.rname = input("Please enter assets admin name: ")
+            self.name     = input("请输入资产的系统用户名称: ")
 
     def get_preconditions(self):
         self.input_preconditions()
 
     def exist(self):
         print("校验系统用户")
-        url = '/api/assets/v1/system-user/'
-        params = {'name': self.name}
-        res = HTTP.get(url, params)
-        res_data = res.json()
+        url               = '/api/assets/v1/system-user/'
+        params            = {'name': self.name}
+        res               = HTTP.get(url, params)
+        res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
-            self.id = res_data[0].get('id')
+            self.id       = res_data[0].get('id')
             return True
-        print("系统用户不存在: {}".format(self.id))
+        print("系统用户不存在")
+        self.username = input("请输入资产的系统用户: ")
         return False
 
-    # def create(self):
-        # print("创建系统用户")
-        # url = '/api/assets/v1/system-user/'
-        # data = {
-            # 'name': self.username,
-            # 'is_active': 'true',
-            # 'username': self.username,
-            # 'email': '{}@{}'.format(self.username, self.email_suffix),
-            # 'is_active': True
-        # }
-        # res = HTTP.post(url, data)
-        # self.id = res.json().get('id')
+    def create(self):
+        print("创建系统用户 {}".format(self.name))
+        url               = '/api/assets/v1/system-user/'
+        data              = {
+            'name': self.name,
+            'username': self.username,
+            'login_mode': 'auto',
+            'protocol': 'ssh',
+            'auto_push': 'true',
+            'sudo': 'All',
+            'shell': '/bin/bash',
+            'auto_generate_key': 'true',
+            'is_active': 'true'
+        }
+        res               = HTTP.post(url, data)
+        self.id           = res.json().get('id')
 
     def perform(self):
         self.get_preconditions()
         if self.exist():
             return
-        sys.exit()
+        self.create()
 
 class AssetPermission(object):
 
     def __init__(self):
-        self.name_prefix = None
-        self.name_suffix = self.get_name_suffix()
+        self.name_prefix  = None
+        self.name_suffix  = self.get_name_suffix()
         if self.name_prefix is not None:
-            self.name = '{}_{}'.format(self.name_prefix, self.name_suffix)
-        self.user = User()
-        self.asset = Asset()
-        self.system_user = SystemUser()
+            self.name     = '{}_{}'.format(self.name_prefix, self.name_suffix)
+        self.user         = User()
+        self.asset        = Asset()
+        self.system_user  = SystemUser()
 
     @staticmethod
     def get_name_suffix():
-        name_suffix_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-        name_suffix_uuid = str(uuid.uuid4().hex[:6])
-        name_suffix = "{}_{}".format(name_suffix_time, name_suffix_uuid)
+        name_suffix_time  = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+        name_suffix_uuid  = str(uuid.uuid4().hex[:6])
+        name_suffix       = "{}_{}".format(name_suffix_time, name_suffix_uuid)
         return name_suffix
 
     def input_preconditions(self):
-        self.name = input("Please enter asset permission name: ")
+        self.name         = input("情输入资产授权名称: ")
 
     def get_preconditions(self):
         self.input_preconditions()
 
     def create(self):
-        print("创建资产授权规则")
-        url = '/api/perms/v1/asset-permissions/'
-        data = {
+        print("创建资产授权名称 {}".format(self.name))
+        url               = '/api/perms/v1/asset-permissions/'
+        data              = {
             'name': self.name,
             'users': [self.user.id],
             'assets': [self.asset.id],
@@ -317,8 +304,8 @@ class AssetPermission(object):
         }
         print("data: ")
         print(data)
-        res = HTTP.post(url, data)
-        res_data = res.json()
+        res               = HTTP.post(url, data)
+        res_data          = res.json()
         if res.status_code in [200, 201]:
             print("response: ")
             print(res_data)
@@ -338,22 +325,39 @@ class AssetPermission(object):
 class APICreateAssetPermission(object):
 
     def __init__(self):
-        self.jms_url = jms_url
-        self.superuser_username = users_username
-        self.superuser_password = users_password
-        self.token = None
-        self.server = None
-        self.perm = AssetPermission()
+        self.jms_url      = jms_url
+        self.username     = users_username
+        self.password     = users_password
+        self.token        = None
+        self.server       = None
 
     def init_http(self):
-        HTTP.server = self.jms_url
-        HTTP.get_token(self.superuser_username, self.superuser_password)
+        HTTP.server       = self.jms_url
+        HTTP.get_token(self.username, self.password)
 
     def perform(self):
         self.init_http()
+        self.perm         = AssetPermission()
         self.perm.perform()
 
+
 if __name__ == '__main__':
+
+    # jumpserver url 地址
+    jms_url                = 'http://192.168.1.118'
+
+    # 管理员账户
+    users_username         = 'admin'
+    users_password         = 'admin'
+
+    # 资产管理用户
+    assets_admin_name      = None
+    assets_admin_username  = None
+    assets_admin_password  = None
+
+    # 资产系统用户
+    assets_system_name     = None
+    assets_system_username = None
 
     api = APICreateAssetPermission()
     api.perform()
