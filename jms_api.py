@@ -87,7 +87,7 @@ class Node(object):
         self.name         = None
 
     def input_preconditions(self):
-        self.name         = input("请输入资产节点名称: ")
+        self.name         = input("请输入资产节点名称 (Default): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -114,7 +114,6 @@ class Node(object):
         self.id           = res.json().get('id')
 
     def perform(self):
-        self.get_preconditions()
         if self.exist():
             return
         self.create()
@@ -162,7 +161,6 @@ class AdminUser(object):
         self.id           = res.json().get('id')
 
     def perform(self):
-        self.get_preconditions()
         if self.exist():
             return
         self.create()
@@ -176,7 +174,7 @@ class Asset(object):
         self.node         = Node()
 
     def input_preconditions(self):
-        self.ip           = input("请输入资产IP: ")
+        self.ip           = input("请输入资产IP (172.16.0.1): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -226,7 +224,7 @@ class SystemUser(object):
 
     def input_preconditions(self):
         if self.name is None:
-            self.name     = input("请输入资产的系统用户名称: ")
+            self.name     = input("请输入资产的系统用户名称 (test_ssh): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -241,7 +239,7 @@ class SystemUser(object):
             self.id       = res_data[0].get('id')
             return True
         print("系统用户不存在")
-        self.username = input("请输入资产的系统用户: ")
+        self.username = input("请输入资产的系统用户 (devuser): ")
         return False
 
     def create(self):
@@ -286,7 +284,7 @@ class AssetPermission(object):
         return name_suffix
 
     def input_preconditions(self):
-        self.name         = input("情输入资产授权名称: ")
+        self.name         = input("情输入资产授权名称 (test_ssh_perms): ")
 
     def get_preconditions(self):
         self.input_preconditions()
