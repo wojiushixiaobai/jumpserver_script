@@ -11,10 +11,11 @@ class HTTP:
     def get_token(cls, username, password):
         print("获取Token")
         data              = {'username': username, 'password': password}
-        url               = "/api/authentication/v1/auth/"
+        url               = "/api/v1/authentication/auth/"
         res               = requests.post(cls.server + url, data)
         res_data          = res.json()
         token             = res_data.get('token')
+        print(token)
         cls.token         = token
 
     @classmethod
@@ -52,19 +53,19 @@ class User(object):
 
     def exist(self):
         print("校验用户")
-        url               = '/api/users/v1/users/'
+        url               = '/api/v1/users/users/'
         params            = {'username': self.username}
         res               = HTTP.get(url, params=params)
         res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("用户不存在")
+        print("用户 {} 不存在".format(self.username))
         return False
 
     def create(self):
         print("创建用户 {}".format(self.username))
-        url               = '/api/users/v1/users/'
+        url               = '/api/v1/users/users/'
         data              = {
             'name': self.username,
             'username': self.username,
@@ -94,19 +95,19 @@ class Node(object):
 
     def exist(self):
         print("校验资产节点")
-        url               = '/api/assets/v1/nodes/'
+        url               = '/api/v1/assets/nodes/'
         params            = {'value': self.name}
         res               = HTTP.get(url, params=params)
         res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("节点不存在")
+        print("节点 {} 不存在".format(self.name))
         return False
 
     def create(self):
         print("创建资产节点 {}".format(self.name))
-        url               = '/api/assets/v1/nodes/'
+        url               = '/api/v1/assets/nodes/'
         data              = {
             'value': self.name
         }
@@ -135,23 +136,24 @@ class AdminUser(object):
 
     def exist(self):
         print("校验管理用户")
-        url               = '/api/assets/v1/admin-user/'
+        url               = '/api/v1/assets/admin-user/'
         params            = {'username': self.name}
         res               = HTTP.get(url, params=params)
         res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("管理用户不存在")
+        print("管理用户 {} 不存在".format(self.name))
+        print("系统将为你创建 {} 管理员用户".format(self.name))
         if self.username is None:
-            self.username = input("请输入资产管理用户 (root): ")
+            self.username = input("请输入资产的管理用户 (root): ")
         if self.password is None:
-            self.password = input("请输入资产管理用户密码 (********): ")
+            self.password = input("请输入资产管理用户 {} 的密码 (********): ".format(self.username))
         return False
 
     def create(self):
         print("创建管理用户 {}".format(self.name))
-        url               = '/api/users/v1/users/'
+        url               = '/api/v1/users/users/'
         data              = {
             'name': self.name,
             'username': self.username,
@@ -183,7 +185,7 @@ class Asset(object):
 
     def exist(self):
         print("校验资产")
-        url               = '/api/assets/v1/assets/'
+        url               = '/api/v1/assets/assets/'
         params            = {
             'ip': self.ip
         }
@@ -192,14 +194,14 @@ class Asset(object):
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("资产不存在")
+        print("资产 {} 不存在".format(self.ip))
         return False
 
     def create(self):
         print("创建资产 {}".format(self.ip))
         self.admin_user.perform()
         self.node.perform()
-        url               = '/api/assets/v1/assets/'
+        url               = '/api/v1/assets/assets/'
         data              = {
             'hostname': self.ip,
             'ip': self.ip,
@@ -231,20 +233,20 @@ class SystemUser(object):
 
     def exist(self):
         print("校验系统用户")
-        url               = '/api/assets/v1/system-user/'
+        url               = '/api/v1/assets/system-user/'
         params            = {'name': self.name}
         res               = HTTP.get(url, params)
         res_data          = res.json()
         if res.status_code in [200, 201] and res_data:
             self.id       = res_data[0].get('id')
             return True
-        print("系统用户不存在")
+        print("系统用户 {} 不存在".format(self.name))
         self.username = input("请输入资产的系统用户 (devuser): ")
         return False
 
     def create(self):
         print("创建系统用户 {}".format(self.name))
-        url               = '/api/assets/v1/system-user/'
+        url               = '/api/v1/assets/system-user/'
         data              = {
             'name': self.name,
             'username': self.username,
@@ -291,7 +293,7 @@ class AssetPermission(object):
 
     def create(self):
         print("创建资产授权名称 {}".format(self.name))
-        url               = '/api/perms/v1/asset-permissions/'
+        url               = '/api/v1/perms/asset-permissions/'
         data              = {
             'name': self.name,
             'users': [self.user.id],
@@ -342,7 +344,7 @@ class APICreateAssetPermission(object):
 if __name__ == '__main__':
 
     # jumpserver url 地址
-    jms_url                = 'http://192.168.1.118'
+    jms_url                = 'http://192.168.100.244'
 
     # 管理员账户
     users_username         = 'admin'
