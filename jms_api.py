@@ -172,11 +172,13 @@ class Asset(object):
     def __init__(self):
         self.id           = None
         self.ip           = None
+        self.protocols    = None
         self.admin_user   = AdminUser()
         self.node         = Node()
 
     def input_preconditions(self):
         self.ip           = input("请输入资产IP (172.16.0.1): ")
+        self.protocols    = input("请输入资产的协议端口 (ssh/22): ")
 
     def get_preconditions(self):
         self.input_preconditions()
@@ -205,6 +207,7 @@ class Asset(object):
         data              = {
             'hostname': self.ip,
             'ip': self.ip,
+            'protocols': [self.protocols],
             'admin_user': self.admin_user.id,
             'nodes': [self.node.id],
             'is_active': True
